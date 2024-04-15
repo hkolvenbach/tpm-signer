@@ -91,6 +91,8 @@ func (t TPM) Sign(rr io.Reader, digest []byte, opts crypto.SignerOpts) ([]byte, 
 	defer t.refreshMutex.Unlock()
 
 	var err error
+	fmt.Printf("Public Area: %v+", t.Key.PublicArea())
+
 	s, err := t.Key.GetSigner()
 	if err != nil {
 		fmt.Printf("Failed to get signer: %v", err)
@@ -171,6 +173,11 @@ func (t TPM) TLSCertificate() tls.Certificate {
 		PrivateKey:  privKey,
 		Leaf:        &t.x509Certificate,
 		Certificate: [][]byte{t.x509Certificate.Raw},
+		SupportedSignatureAlgorithms: []tls.SignatureScheme{
+			tls.PSSWithSHA256,
+			tls.PKCS1WithSHA256,
+			tls.ECDSAWithP256AndSHA256,
+		},
 	}
 }
 
